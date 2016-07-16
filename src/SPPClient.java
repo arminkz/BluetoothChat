@@ -79,7 +79,7 @@ public class SPPClient implements DiscoveryListener{
         // check for spp service
         RemoteDevice remoteDevice = (RemoteDevice)vecDevices.elementAt(index-1);
         UUID[] uuidSet = new UUID[1];
-        uuidSet[0]=new UUID("1101",false);
+        uuidSet[0]=new UUID("1101",true);
         System.out.println("\nSearching for service...");
         agent.searchServices(null,uuidSet,remoteDevice,client);
 
