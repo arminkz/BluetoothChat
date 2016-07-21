@@ -33,6 +33,8 @@ public class SPPClient implements DiscoveryListener{
 
     DiscoveryAgent agent;
 
+    String partnerName;
+
     BufferedReader in;
     PrintWriter out;
 
@@ -89,11 +91,14 @@ public class SPPClient implements DiscoveryListener{
         try {
             // check for spp service
             RemoteDevice remoteDevice = vecDevices.elementAt(index);
+            partnerName = remoteDevice.getFriendlyName(true);
             UUID[] uuidSet = new UUID[1];
             uuidSet[0]=new UUID("1101",true);
             System.out.println("\nSearching for service...");
             agent.searchServices(null,uuidSet,remoteDevice,this);
         } catch (BluetoothStateException e) {
+            e.printStackTrace();
+        } catch (IOException e){
             e.printStackTrace();
         }
     }

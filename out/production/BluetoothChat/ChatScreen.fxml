@@ -6,10 +6,10 @@
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.TextFlow?>
 
 <GridPane alignment="center" hgap="0" prefHeight="200" prefWidth="200" vgap="0" xmlns="http://javafx.com/javafx/null" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ChatScreenController">
    <columnConstraints>
-      <ColumnConstraints />
       <ColumnConstraints hgrow="ALWAYS" />
    </columnConstraints>
 
@@ -19,12 +19,18 @@
    </rowConstraints>
 
    <children>
-      <TextArea fx:id="chatLog" editable="false" focusTraversable="false" mouseTransparent="true" GridPane.columnIndex="1" GridPane.fillHeight="true" GridPane.fillWidth="true">
+      <!--<TextArea fx:id="chatLog" editable="false" focusTraversable="false" mouseTransparent="true" GridPane.columnIndex="1" GridPane.fillHeight="true" GridPane.fillWidth="true">
          <GridPane.margin>
             <Insets left="4.0" right="4.0" top="4.0" />
-         </GridPane.margin></TextArea>
+         </GridPane.margin></TextArea>-->
 
-      <GridPane GridPane.columnIndex="1" GridPane.rowIndex="1">
+       <TextFlow fx:id="chatLog" style="-fx-background-radius: 3; -fx-background-color: #FFF; -fx-border-color: #CCC; -fx-border-radius: 3;">
+           <GridPane.margin>
+               <Insets left="4.0" right="4.0" top="4.0" />
+           </GridPane.margin>
+       </TextFlow>
+
+      <GridPane GridPane.rowIndex="1">
           <GridPane.margin>
               <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
           </GridPane.margin>
@@ -48,6 +54,7 @@
          </children>
 
       </GridPane>
+
 
    </children>
 

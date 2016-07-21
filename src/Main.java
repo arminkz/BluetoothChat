@@ -1,4 +1,5 @@
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
@@ -20,6 +21,9 @@ public class Main extends Application {
     SPPServer server;
     SPPClient client;
 
+    String myName;
+    String partnerName;
+
     BufferedReader in;
     PrintWriter out;
 
@@ -32,6 +36,13 @@ public class Main extends Application {
         mainContainer.loadScreen("LoadingScreen","LoadingScreen.fxml");
         mainContainer.loadScreen("ServerListScreen","ServerListScreen.fxml");
         mainContainer.setScreen("StartScreen");
+
+        try {
+            LocalDevice localDevice = LocalDevice.getLocalDevice();
+            myName = localDevice.getFriendlyName();
+        } catch (BluetoothStateException e) {
+            e.printStackTrace();
+        }
     }
 
     public void initServer(){
@@ -49,6 +60,7 @@ public class Main extends Application {
             server.setOnConnectionSuccessful((ActionEvent e) -> {
                 in = server.in;
                 out = server.out;
+                partnerName = server.partnerName;
                 mainContainer.setScreen("ChatScreen");
                 (new streamPoller()).start();
             });
@@ -78,6 +90,7 @@ public class Main extends Application {
         client.setOnConnectionSuccessful((ActionEvent e) -> {
             in = client.in;
             out = client.out;
+            partnerName = client.partnerName;
             mainContainer.setScreen("ChatScreen");
             (new streamPoller()).start();
         });
@@ -102,15 +115,23 @@ public class Main extends Application {
         out.flush();
     }
 
+    public void recieveMsg(String s){
+        ChatScreenController ch = ((ChatScreenController)mainContainer.getScreenController("ChatScreen"));
+        ch.recivedMassage(s);
+    }
+
     class streamPoller extends Thread{
 
-        ChatScreenController ch = ((ChatScreenController)mainContainer.getScreenController("ChatScreen"));
-
         public void run(){
-            while(true){
+            boolean isRun = true;
+            while(isRun){
                 try {
-                    String s = in.readLine();
-                    if(s != null) ch.recivedMassage("O",s);
+                    if(in != null) {
+                        System.out.println("in not null");
+                        String s = in.readLine();
+                        if (s != null) Platform.runLater(() -> recieveMsg(s));
+                        else isRun = false;
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

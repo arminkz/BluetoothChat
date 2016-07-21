@@ -23,6 +23,8 @@ public class SPPServer extends Thread {
     //Create the Servicve URL
     String connectionString = "btspp://localhost:" + uuid + ";name=BlutoothChat";
 
+    String partnerName;
+
     public BufferedReader in;
     public PrintWriter out;
 
@@ -44,18 +46,21 @@ public class SPPServer extends Thread {
             System.out.println("\nServer Started. Waiting for clients to connect…");
             StreamConnection connection = streamConnNotifier.acceptAndOpen();
 
-            if(onConnectionSuccessful != null) onConnectionSuccessful.actionPerformed(new ActionEvent(this,ActionEvent.RESERVED_ID_MAX+1,""));
-
-            RemoteDevice dev = RemoteDevice.getRemoteDevice(connection);
-            System.out.println("Remote device address: " + dev.getBluetoothAddress());
-            System.out.println("Remote device name: " + dev.getFriendlyName(true));
-
-            //init in/out streams
             InputStream inStream = connection.openInputStream();
             in = new BufferedReader(new InputStreamReader(inStream));
 
             OutputStream outStream = connection.openOutputStream();
             out = new PrintWriter(new OutputStreamWriter(outStream));
+
+            RemoteDevice dev = RemoteDevice.getRemoteDevice(connection);
+            System.out.println("Remote device address: " + dev.getBluetoothAddress());
+            System.out.println("Remote device name: " + dev.getFriendlyName(true));
+
+            partnerName = dev.getFriendlyName(true);
+
+            if(onConnectionSuccessful != null) onConnectionSuccessful.actionPerformed(new ActionEvent(this,ActionEvent.RESERVED_ID_MAX+1,""));
+            //init in/out streams
+
 
         }catch (IOException e){
             e.printStackTrace();
