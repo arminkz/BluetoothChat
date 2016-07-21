@@ -1,3 +1,5 @@
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,51 +15,71 @@ import javax.microedition.io.*;
  * Class that implements an SPP Server which accepts single line of
  * message from an SPP client and sends a single line of response to the client.
  */
-public class SPPServer {
+public class SPPServer extends Thread {
+
+    //Create a UUID for SPP / RFComm
+    UUID uuid = new UUID("1101", true);
+
+    //Create the Servicve URL
+    String connectionString = "btspp://localhost:" + uuid + ";name=BlutoothChat";
+
+    public BufferedReader in;
+    public PrintWriter out;
+
+    StreamConnectionNotifier streamConnNotifier;
+
+    private ActionListener onConnectionSuccessful;
+
+    public void setOnConnectionSuccessful(ActionListener onConnectionSuccessful) {
+        this.onConnectionSuccessful = onConnectionSuccessful;
+    }
 
     //start server
-    private void startServer() throws IOException{
-        //Create a UUID for SPP
-        UUID uuid = new UUID("1101", true);
+    public void run(){
+        try {
+            //open server url
+            streamConnNotifier = (StreamConnectionNotifier) Connector.open(connectionString);
 
-        //Create the Servicve URL
-        String connectionString = "btspp://localhost:" + uuid +";name=BlutoothTest";
+            //Wait for client connection
+            System.out.println("\nServer Started. Waiting for clients to connect…");
+            StreamConnection connection = streamConnNotifier.acceptAndOpen();
 
-        //open server url
-        StreamConnectionNotifier streamConnNotifier = (StreamConnectionNotifier)Connector.open( connectionString );
+            if(onConnectionSuccessful != null) onConnectionSuccessful.actionPerformed(new ActionEvent(this,ActionEvent.RESERVED_ID_MAX+1,""));
 
-        //Wait for client connection
-        System.out.println("\nServer Started. Waiting for clients to connect…");
-        StreamConnection connection=streamConnNotifier.acceptAndOpen();
+            RemoteDevice dev = RemoteDevice.getRemoteDevice(connection);
+            System.out.println("Remote device address: " + dev.getBluetoothAddress());
+            System.out.println("Remote device name: " + dev.getFriendlyName(true));
 
-        RemoteDevice dev = RemoteDevice.getRemoteDevice(connection);
-        System.out.println("Remote device address: "+dev.getBluetoothAddress());
-        System.out.println("Remote device name: "+dev.getFriendlyName(true));
+            //init in/out streams
+            InputStream inStream = connection.openInputStream();
+            in = new BufferedReader(new InputStreamReader(inStream));
 
-        //read string from spp client
-        InputStream inStream=connection.openInputStream();
-        BufferedReader bReader = new BufferedReader(new InputStreamReader(inStream));
-        String lineRead = bReader.readLine();
-        System.out.println(lineRead);
+            OutputStream outStream = connection.openOutputStream();
+            out = new PrintWriter(new OutputStreamWriter(outStream));
 
-        //send response to spp client
-        OutputStream outStream = connection.openOutputStream();
-        PrintWriter pWriter=new PrintWriter(new OutputStreamWriter(outStream));
-        pWriter.write("Response String from SPP Server\r\n");
-        pWriter.flush();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
 
-        pWriter.close();
-        streamConnNotifier.close();
+    public void closeConnection(){
+        try {
+            streamConnNotifier.close();
+            out.flush();
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void main(String[] args) throws IOException {
         //display local device address and name
-        LocalDevice localDevice = LocalDevice.getLocalDevice();
+        /*LocalDevice localDevice = LocalDevice.getLocalDevice();
         System.out.println("Address: "+localDevice.getBluetoothAddress());
         System.out.println("Name: "+localDevice.getFriendlyName());
 
         SPPServer sampleSPPServer=new SPPServer();
-        sampleSPPServer.startServer();
+        sampleSPPServer.startServer();*/
     }
 
 }

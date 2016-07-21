@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<?import javafx.geometry.Insets?>
+<GridPane alignment="center" hgap="0" prefHeight="200" prefWidth="200" vgap="0" xmlns="http://javafx.com/javafx/null" xmlns:fx="http://javafx.com/fxml/1" fx:controller="LoadingScreenController">
+   <columnConstraints>
+      <ColumnConstraints />
+   </columnConstraints>
+
+   <rowConstraints>
+      <RowConstraints />
+      <RowConstraints />
+   </rowConstraints>
+   <children>
+      <ProgressIndicator GridPane.valignment="BOTTOM" >
+       <GridPane.margin>
+           <Insets bottom="40.0" />
+       </GridPane.margin></ProgressIndicator>
+      <Label fx:id="loadLbl" text="Searching for Bluetooth Devices ..." GridPane.rowIndex="1" />
+       
+   </children>
+
+</GridPane>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<GridPane alignment="center" hgap="0" prefHeight="200" prefWidth="200" vgap="0" xmlns="http://javafx.com/javafx/null" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ChatScreenController">
+   <columnConstraints>
+      <ColumnConstraints />
+      <ColumnConstraints hgrow="ALWAYS" />
+   </columnConstraints>
+
+   <rowConstraints>
+      <RowConstraints vgrow="ALWAYS" />
+      <RowConstraints />
+   </rowConstraints>
+
+   <children>
+      <TextArea fx:id="chatLog" editable="false" focusTraversable="false" mouseTransparent="true" GridPane.columnIndex="1" GridPane.fillHeight="true" GridPane.fillWidth="true">
+         <GridPane.margin>
+            <Insets left="4.0" right="4.0" top="4.0" />
+         </GridPane.margin></TextArea>
+
+      <GridPane GridPane.columnIndex="1" GridPane.rowIndex="1">
+          <GridPane.margin>
+              <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+          </GridPane.margin>
+
+        <columnConstraints>
+          <ColumnConstraints hgrow="ALWAYS" />
+          <ColumnConstraints minWidth="80" />
+        </columnConstraints>
+
+        <rowConstraints>
+          <RowConstraints vgrow="ALWAYS" />
+        </rowConstraints>
+
+         <children>
+            <TextArea fx:id="chatText" prefRowCount="1">
+               <GridPane.margin>
+                  <Insets right="6.0" />
+               </GridPane.margin></TextArea>
+             <Button fx:id="sendButton" defaultButton="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#sendMassage" text="Send" GridPane.columnIndex="1">
+             </Button>
+         </children>
+
+      </GridPane>
+
+   </children>
+
+</GridPane>

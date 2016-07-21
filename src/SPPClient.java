@@ -1,3 +1,5 @@
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -5,15 +7,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Vector;
 
-import javax.bluetooth.DeviceClass;
-import javax.bluetooth.DiscoveryAgent;
-import javax.bluetooth.DiscoveryListener;
-import javax.bluetooth.LocalDevice;
-import javax.bluetooth.RemoteDevice;
-import javax.bluetooth.ServiceRecord;
-import javax.bluetooth.UUID;
+import javax.bluetooth.*;
 import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 
@@ -26,24 +23,87 @@ public class SPPClient implements DiscoveryListener{
     private static Object lock = new Object();
 
     //vector containing the devices discovered
-    private static Vector vecDevices=new Vector();
+    private static Vector<RemoteDevice> vecDevices=new Vector();
 
     private static String connectionURL=null;
 
+    private ActionListener onDeviceDiscovery;
+    private ActionListener onConnectionSuccessful;
+    private ActionListener onConnectionFailed;
+
+    DiscoveryAgent agent;
+
+    BufferedReader in;
+    PrintWriter out;
+
+    public SPPClient(){
+        try {
+            //display local device address and name
+            LocalDevice localDevice = LocalDevice.getLocalDevice();
+            System.out.println("Address: "+localDevice.getBluetoothAddress());
+            System.out.println("Name: "+localDevice.getFriendlyName());
+
+            agent = localDevice.getDiscoveryAgent();
+
+        } catch (BluetoothStateException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setOnDeviceDiscovery(ActionListener onDeviceDiscovery) {
+        this.onDeviceDiscovery = onDeviceDiscovery;
+    }
+
+    public void setOnConnectionFailed(ActionListener onConnectionFailed) {
+        this.onConnectionFailed = onConnectionFailed;
+    }
+
+    public void setOnConnectionSuccessful(ActionListener onConnectionSuccessful) {
+        this.onConnectionSuccessful = onConnectionSuccessful;
+    }
+
+    public void startDiscovery(){
+        vecDevices=new Vector();
+        System.out.println("Starting device inquiry…");
+        try {
+            agent.startInquiry(DiscoveryAgent.GIAC, this);
+        } catch (BluetoothStateException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public ArrayList<RemoteDeviceInfo> getDeviceInfos(){
+        ArrayList<RemoteDeviceInfo> res = new ArrayList<>();
+        for(RemoteDevice rd : vecDevices){
+            try {
+                RemoteDeviceInfo rdi = new RemoteDeviceInfo(rd.getFriendlyName(true),rd.getBluetoothAddress());
+                res.add(rdi);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return res;
+    }
+
+    public void connect(int index){
+        try {
+            // check for spp service
+            RemoteDevice remoteDevice = vecDevices.elementAt(index);
+            UUID[] uuidSet = new UUID[1];
+            uuidSet[0]=new UUID("1101",true);
+            System.out.println("\nSearching for service...");
+            agent.searchServices(null,uuidSet,remoteDevice,this);
+        } catch (BluetoothStateException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     public static void main(String[] args) throws IOException {
 
-        SPPClient client = new SPPClient();
+        /*SPPClient client = new SPPClient();
 
-        //display local device address and name
-        LocalDevice localDevice = LocalDevice.getLocalDevice();
-        System.out.println("Address: "+localDevice.getBluetoothAddress());
-        System.out.println("Name: "+localDevice.getFriendlyName());
 
-        //find devices
-        DiscoveryAgent agent = localDevice.getDiscoveryAgent();
-
-        System.out.println("Starting device inquiry…");
-        agent.startInquiry(DiscoveryAgent.GIAC, client);
 
         try {
             synchronized(lock){
@@ -54,7 +114,7 @@ public class SPPClient implements DiscoveryListener{
             e.printStackTrace();
         }
 
-        System.out.println("Device Inquiry Completed. ");
+
 
         //print all devices in vecDevices
         int deviceCount = vecDevices.size();
@@ -106,7 +166,7 @@ public class SPPClient implements DiscoveryListener{
         InputStream inStream = streamConnection.openInputStream();
         BufferedReader bReader2=new BufferedReader(new InputStreamReader(inStream));
         String lineRead = bReader2.readLine();
-        System.out.println(lineRead);
+        System.out.println(lineRead);*/
     }//main
 
     // methods of DiscoveryListener
@@ -117,27 +177,38 @@ public class SPPClient implements DiscoveryListener{
         }
     }
 
+    boolean isOK = false;
+
     //implement this method since services are not being discovered
     public void servicesDiscovered(int transID, ServiceRecord[] servRecord) {
         if(servRecord!=null && servRecord.length>0){
-            connectionURL=servRecord[0].getConnectionURL(0,false);
+            connectionURL = servRecord[0].getConnectionURL(0,false);
         }
-        synchronized(lock){
-            lock.notify();
+        isOK = true;
+        try {
+            StreamConnection streamConnection = (StreamConnection) Connector.open(connectionURL);
+            // send string
+            OutputStream outStream = streamConnection.openOutputStream();
+            out = new PrintWriter(new OutputStreamWriter(outStream));
+            // read response
+            InputStream inStream = streamConnection.openInputStream();
+            in = new BufferedReader(new InputStreamReader(inStream));
+            if(onConnectionSuccessful != null) onConnectionSuccessful.actionPerformed(new ActionEvent(this,ActionEvent.RESERVED_ID_MAX+1,""));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     //implement this method since services are not being discovered
     public void serviceSearchCompleted(int transID, int respCode) {
-        synchronized(lock){
-            lock.notify();
+        if(!isOK) {
+            if(onConnectionFailed != null) onConnectionFailed.actionPerformed(new ActionEvent(this,ActionEvent.RESERVED_ID_MAX+1,""));
         }
     }
 
     public void inquiryCompleted(int discType) {
-        synchronized(lock){
-            lock.notify();
-        }
-    }//end method
+        if(onDeviceDiscovery != null) onDeviceDiscovery.actionPerformed(new ActionEvent(this,ActionEvent.RESERVED_ID_MAX + 1,""));
+        System.out.println("Device Inquiry Completed. ");
+    }
 
 }

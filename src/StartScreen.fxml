@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/null" xmlns:fx="http://javafx.com/fxml/1" fx:controller="StartScreenController">
+  <columnConstraints>
+    <ColumnConstraints hgrow="ALWAYS" />
+  </columnConstraints>
+
+  <rowConstraints>
+    <RowConstraints vgrow="ALWAYS" />
+      <RowConstraints vgrow="ALWAYS" />
+  </rowConstraints>
+   <children>
+      <Button mnemonicParsing="false" stylesheets="@MyButtonStyle.css" text="Start as Server" GridPane.halignment="CENTER" GridPane.valignment="BOTTOM" onAction="#initServer">
+         <GridPane.margin>
+            <Insets bottom="40.0" />
+         </GridPane.margin></Button>
+      <Button mnemonicParsing="false" stylesheets="@MyButtonStyle.css" text="Start as Client" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="TOP" onAction="#initClient" />
+   </children>
+
+</GridPane>
